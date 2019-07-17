@@ -60,12 +60,12 @@ define cinder::backend::iscsi (
   # NOTE(mnaser): Cinder requires /usr/sbin/thin_check to create volumes which
   #               does not get installed with Cinder (see LP#1615134).
 
-	if ! defined(Package['thin-provisioning-tools']) {
- 	  package { 'thin-provisioning-tools':
- 	    ensure => present,
- 	    tag    => 'cinder-support-package',
- 	  }
- 	}
+  if ! defined(Package['thin-provisioning-tools']) {
+    package { 'thin-provisioning-tools':
+      ensure => present,
+      tag    => 'cinder-support-package',
+    }
+  }
 
   cinder_config {
     "${name}/volume_backend_name":  value => $volume_backend_name;
@@ -88,10 +88,12 @@ define cinder::backend::iscsi (
 
   case $iscsi_helper {
     'tgtadm': {
-      package { 'tgt':
-        ensure => present,
-        name   => $::cinder::params::tgt_package_name,
-        tag    => 'cinder-support-package',
+      if ! defined(Package['tgt']) {
+        package { 'tgt':
+          ensure => present,
+          name   => $::cinder::params::tgt_package_name,
+          tag    => 'cinder-support-package',
+        }
       }
 
       if($::osfamily == 'RedHat') {
@@ -119,10 +121,12 @@ define cinder::backend::iscsi (
         tag    => 'cinder-support-service',
       }
 
-      package { 'targetcli':
-        ensure => present,
-        name   => $::cinder::params::lio_package_name,
-        tag    => 'cinder-support-package',
+      if ! defined(Package['targetcli']) {
+        package { 'targetcli':
+          ensure => present,
+          name   => $::cinder::params::lio_package_name,
+          tag    => 'cinder-support-package',
+        }
       }
     }
 
